@@ -1,0 +1,50 @@
+---
+
+- name: Push log messages to PaperTrail.
+  copy: src=rsyslog.papertrail dest=/etc/rsyslog.d/papertrail.conf owner=root group=adm mode=0664
+  notify:
+    - restart rsyslog
+  tags:
+    - papertrail
+    - rm10149
+
+# - name: Install remote_syslog2
+#   apt: deb=https://github.com/papertrail/remote_syslog2/releases/download/v0.17-beta-pkgs/remote-syslog2_0.17_amd64.deb
+#   tags:
+#     - papertrail
+
+# This could be simplified if we upgrade Ansible to 2.1, but ...
+# that might break stuff too. So this will do for tonight.
+# It's a bit locked to amd64 and specific version and ...
+- name: Check if remote_syslog2 is installed
+  command: dpkg-query -W remote_syslog2
+  register: remote_syslog2_check_installed
+  failed_when: remote_syslog2_check_installed.rc > 1
+  changed_when: remote_syslog2_check_installed.rc == 1
+  tags:
+    - papertrail
+    - rm10149
+
+- name: Download remote_syslog2
+  get_url:
+    url="https://github.com/papertrail/remote_syslog2/releases/download/v0.17-beta-pkgs/remote-syslog2_0.17_amd64.deb"
+    dest="/tmp/remote-syslog2_0.17_amd64.deb"
+  when: remote_syslog2_check_installed.rc == 1
+  tags:
+    - papertrail
+    - rm10149
+
+- name: Install remote_syslog2
+  apt: deb="/tmp/remote-syslog2_0.17_amd64.deb"
+  when: remote_syslog2_check_installed.rc == 1
+  tags:
+    - papertrail
+    - rm10149
+
+- name: Configure remote_syslog2
+  copy: src=remote_syslog2.log_files.yml dest=/etc/log_files.yml owner=root group=adm mode=0664
+  notify:
+    - reload remote_syslog2
+  tags:
+    - papertrail
+    - rm10149

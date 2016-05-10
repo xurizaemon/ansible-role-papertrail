@@ -1,0 +1,15 @@
+files:
+  - /var/log/backupninja.log
+  - /var/log/civicrm.log
+  - /var/log/drupal.log
+  - /var/log/mysql.log
+  - /var/log/mysql/error.log
+  - /var/log/mysql/mysql-slow.log
+  - /var/log/php5-fpm.log
+  # also add CiviCRM logfiles here ... somehow?
+destination:
+  host: logsX.papertrailapp.com
+  port: 12345
+  protocol: tls
+exclude_patterns:
+  - don't log on me

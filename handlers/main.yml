@@ -1,0 +1,4 @@
+---
+
+- name: reload remote_syslog2
+  command: /etc/init.d/remote_syslog restart
